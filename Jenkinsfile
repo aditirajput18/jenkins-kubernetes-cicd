@@ -41,6 +41,7 @@ pipeline {
 
     environment {
         PYTHON_VENV = 'venv'
+        TRIVY_BIN = "${params.TRIVY_BIN}"
     }
 
     stages {
@@ -90,24 +91,40 @@ pipeline {
             }
         }
 
-        stage('Validate Tools and Target') {
-            steps {
-                sh '''
-                    set -eu
+
+
+	stage('Validate Tools and Target') {
+ 	   steps {
+       	       script {
+                   withEnv([
+                	"TRIVY_BIN=${params.TRIVY_BIN}",
+                	"DOCKERFILE_PATH=${params.DOCKERFILE_PATH}",
+                	"K8S_CONTEXT=${params.K8S_CONTEXT}",
+                	"K8S_NAMESPACE=${params.K8S_NAMESPACE}",
+                	"DEPLOYMENT_NAME=${params.DEPLOYMENT_NAME}"
+            	    ]) {
+               		 sh '''
+                    	    set -eu
+
                     command -v git
                     command -v python3
                     command -v docker
                     command -v kubectl
+
                     test -x "$TRIVY_BIN"
                     test -f "$DOCKERFILE_PATH"
+
                     kubectl --context "$K8S_CONTEXT" \
                         get namespace "$K8S_NAMESPACE"
+
                     kubectl --context "$K8S_CONTEXT" \
-                        -n "$K8S_NAMESPACE" get deployment "$DEPLOYMENT_NAME"
+                        -n "$K8S_NAMESPACE" \
+                        get deployment "$DEPLOYMENT_NAME"
                 '''
             }
         }
-
+    }
+}
         stage('Install Dependencies') {
             steps {
                 sh '''
