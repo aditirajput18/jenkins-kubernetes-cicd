@@ -136,3 +136,5 @@ Developed as an SRE Intern assessment project to demonstrate automated testing, 
 
 
 Webhook trigger verification: 2026-10-21 13:49:08 UTC
+
+Webhook verification: GitHub push triggers Jenkins automatically.
