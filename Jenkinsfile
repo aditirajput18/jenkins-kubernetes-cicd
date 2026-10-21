@@ -22,7 +22,7 @@ pipeline {
 
         string(name: 'IMAGE_NAME', defaultValue: 'jenkins-kubernetes-cicd', description: 'Image name, without tag or registry hostname')
         string(name: 'DOCKERFILE_PATH', defaultValue: 'Dockerfile', description: 'Path to Dockerfile relative to repository root')
-        string(name: 'TEST_COMMAND', defaultValue: './venv/bin/python -m pytest -v', description: 'Automated test command')
+
 
         choice(name: 'IMAGE_DELIVERY', choices: ['KIND', 'REGISTRY'], description: 'Image delivery method')
         string(name: 'K8S_CLUSTER', defaultValue: 'cicd-assessment', description: 'kind cluster name; used only with KIND delivery')
@@ -53,7 +53,6 @@ pipeline {
                     requireValue('DEPLOYMENT_NAME', params.DEPLOYMENT_NAME)
                     requireValue('CONTAINER_NAME', params.CONTAINER_NAME)
                     requireValue('DOCKERFILE_PATH', params.DOCKERFILE_PATH)
-                    requireValue('TEST_COMMAND', params.TEST_COMMAND)
                     requireValue('TRIVY_BIN', params.TRIVY_BIN)
 
                     if (!(params.IMAGE_NAME ==~ /[a-zA-Z0-9][a-zA-Z0-9._\/-]*/)) {
@@ -137,11 +136,10 @@ pipeline {
             steps {
                 sh '''
                     set -eu
-                    # This parameter is intended for trusted repository maintainers.
-                    eval "$TEST_COMMAND"
+                    ./venv/bin/python -m pytest -v
                 '''
             }
-        }
+
 
         stage('Build Docker Image') {
             steps {
