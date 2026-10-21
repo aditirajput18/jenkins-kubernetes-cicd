@@ -31,8 +31,12 @@ pipeline {
             description: 'Image name, without tag or registry hostname')
         string(name: 'DOCKERFILE_PATH', defaultValue: 'Dockerfile',
             description: 'Path to Dockerfile relative to repository root')
-        string(name: 'TEST_COMMAND', defaultValue='./venv/bin/python -m pytest -v',
-            description: 'Automated test command')
+        string([
+            $class: 'StringParameterDefinition',
+            name: 'TEST_COMMAND',
+            defaultValue: './venv/bin/python -m pytest -v',
+            description: 'Automated test command'
+        ])
 
         choice(name: 'IMAGE_DELIVERY', choices: ['KIND', 'REGISTRY'],
             description: 'KIND loads the image into a local kind cluster; REGISTRY pushes it to a registry')
