@@ -2,16 +2,16 @@
 
 ## Overview
 
-This project demonstrates an automated CI/CD pipeline for a Python Flask application using Jenkins, Docker, Trivy, and Kubernetes (kind).
+This project demonstrates an automated CI/CD pipeline for a Python Flask application using Jenkins, Docker, Trivy, and Kubernetes.
 
-A GitHub push webhook triggers Jenkins to execute the pipeline. The pipeline checks out the source code, validates the environment, installs dependencies, runs automated tests, builds a Docker image, scans it for HIGH and CRITICAL vulnerabilities, records build metadata, delivers the image, and deploys it to Kubernetes.
+A GitHub push webhook triggers Jenkins to execute the pipeline automatically. The pipeline validates the configuration, checks the required tools and deployment target, installs dependencies, runs automated tests, builds a Docker image, scans it for HIGH and CRITICAL vulnerabilities using Trivy, and records build metadata with a SHA-256 checksum.
 
 The pipeline supports two image-delivery modes:
 
-- **KIND:** Loads the built image into an existing local kind cluster.
-- **REGISTRY:** Pushes the image to a configured container registry for Kubernetes to pull.
+- **KIND:** Loads the Docker image directly into the existing kind Kubernetes cluster.
+- **REGISTRY:** Pushes the image to a configured container registry for deployment.
 
-Deployment verification includes waiting for the Kubernetes rollout to complete. If deployment fails, the pipeline collects diagnostic information and attempts to roll back to the previous Deployment revision.
+Finally, Jenkins deploys the image to Kubernetes, verifies the rollout, collects diagnostic information if deployment fails, and attempts to roll back to the previous Deployment revision. Automated rollback is implemented but has not yet been validated through an end-to-end failed deployment test.
 
 ## Architecture
 
@@ -199,7 +199,7 @@ Check that the webhook URL points to the currently reachable Jenkins endpoint, t
 - The current deployment target is a local kind cluster.
 - The public webhook depends on the availability of the configured endpoint. Cloudflare Quick Tunnels are temporary and are not intended to provide production uptime guarantees.
 - The `REGISTRY` delivery path and deployment against a second Kubernetes cluster require independent testing before being considered verified.
-- The automatic rollback implementation should be tested using a controlled rollout failure.
+- Automatic rollback is implemented in the Jenkins pipeline but has not yet been verified through an end-to-end failed deployment test.
 - Production use would require hardened credentials, restricted access controls, a reliable registry, managed infrastructure, and a documented recovery strategy.
 - Prometheus and Grafana could be added for metrics, dashboards, and operational monitoring.
 
