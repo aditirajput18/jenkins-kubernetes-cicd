@@ -7,6 +7,13 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    environment {
+        IMAGE_NAME = 'jenkins-kubernetes-cicd'
+        K8S_CLUSTER = 'cicd-assessment'
+        DEPLOYMENT_NAME = 'cicd-assessment-app'
+        CONTAINER_NAME = 'flask-app'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -32,18 +39,45 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t jenkins-kubernetes-cicd:${BUILD_NUMBER} .'
+                sh '''
+                    docker build \
+                      -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                '''
+            }
+        }
+
+        stage('Load Image into kind') {
+            steps {
+                sh '''
+                    kind load docker-image \
+                      ${IMAGE_NAME}:${BUILD_NUMBER} \
+                      --name ${K8S_CLUSTER}
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl set image \
+                      deployment/${DEPLOYMENT_NAME} \
+                      ${CONTAINER_NAME}=${IMAGE_NAME}:${BUILD_NUMBER}
+
+                    kubectl rollout status \
+                      deployment/${DEPLOYMENT_NAME} \
+                      --timeout=120s
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'CI/CD pipeline succeeded: application deployed.'
         }
 
         failure {
-            echo 'Pipeline failed. Check the stage logs for details.'
+            echo 'Pipeline failed. Review the stage logs.'
         }
 
         always {
@@ -51,3 +85,4 @@ pipeline {
         }
     }
 }
+
