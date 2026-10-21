@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+venv
+__pycache__
+.pytest_cache
+*.py[cod]
+.env
+.env.*
+.kube
+kubeconfig
+Jenkinsfile.backup
+build-info.txt
+build-info.txt.sha256
