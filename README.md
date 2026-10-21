@@ -4,7 +4,7 @@
 
 This project demonstrates an automated CI/CD pipeline for a Python Flask application using Jenkins, Docker, Trivy, and Kubernetes (kind).
 
-A Git commit triggers Jenkins SCM polling. The pipeline checks out the source code, validates the environment, installs dependencies, runs automated tests, builds a Docker image, scans the image for HIGH and CRITICAL vulnerabilities, records build metadata, loads the image into kind, and deploys it to Kubernetes.
+A GitHub push webhook triggers Jenkins automatically. The pipeline checks out the source code, validates the environment, installs dependencies, runs automated tests, builds a Docker image, scans the image for HIGH and CRITICAL vulnerabilities, records build metadata, loads the image into kind, and deploys it to Kubernetes.
 
 ## Architecture
 
@@ -126,7 +126,7 @@ kubectl --context kind-cicd-assessment get events --sort-by=.lastTimestamp
 ## Limitations and Future Improvements
 
 - The current deployment targets a local kind cluster.
-- SCM polling is used instead of a webhook.
+- GitHub push webhooks have been verified; the local kind cluster remains the deployment target.
 - Production deployment would require managed secrets, access controls, image registry integration, and a defined rollback strategy.
 - Monitoring and alerting can be integrated with Prometheus and Grafana.
 
@@ -135,6 +135,4 @@ kubectl --context kind-cicd-assessment get events --sort-by=.lastTimestamp
 Developed as an SRE Intern assessment project to demonstrate automated testing, containerization, vulnerability scanning, and Kubernetes deployment.
 
 
-Webhook trigger verification: 2026-10-21 13:49:08 UTC
 
-Webhook verification: GitHub push triggers Jenkins automatically.

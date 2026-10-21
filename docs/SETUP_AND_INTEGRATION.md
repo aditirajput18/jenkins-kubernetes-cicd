@@ -25,14 +25,19 @@ The Jenkins agent must have a working kubeconfig for the target cluster. Configu
 
 ## Configure a Jenkins Pipeline job
 
-1. Configure a Pipeline job whose Pipeline definition loads the Jenkinsfile from source control.
-2. Configure the repository used to load the Jenkinsfile. SCM polling applies to that configured SCM source.
-3. Ensure the Git plugin and required pipeline steps are available.
-4. Ensure the Jenkins agent has the tools and permissions listed above.
-5. Run the job once with the defaults and inspect each stage.
-6. For private source repositories, create a Jenkins Git credential and set GIT_CREDENTIALS_ID.
-7. Keep Jenkins credentials out of source control and build logs.
+1. Create a Jenkins Pipeline job configured to load the Jenkinsfile from this GitHub repository.
+2. Set the repository URL, branch (`main`), and Jenkinsfile path (`Jenkinsfile`).
+3. Enable **GitHub hook trigger for GITScm polling** in the job configuration.
+4. Configure the GitHub repository webhook to use
+   `https://<your-jenkins-endpoint>/github-webhook/` with content type `application/json`.
+5. Ensure the Jenkins agent has the required tools and permissions.
+6. For a private source repository, configure a Jenkins Git credential and set `GIT_CREDENTIALS_ID`.
+7. Push a small README change and confirm that Jenkins starts a build automatically.
 
+The webhook has been tested successfully in this project. If using a temporary
+Cloudflare Quick Tunnel, its URL may change when the tunnel restarts. Update
+the GitHub webhook URL accordingly. Never expose an unsecured Jenkins instance
+directly to the public internet.
 ## Important parameters
 
 | Parameter | Purpose |
@@ -41,7 +46,6 @@ The Jenkins agent must have a working kubeconfig for the target cluster. Configu
 | GIT_CREDENTIALS_ID | Optional credential ID for private Git |
 | IMAGE_NAME | Image name without tag or registry hostname |
 | DOCKERFILE_PATH | Dockerfile location |
-| TEST_COMMAND | Test command for the checked-out project |
 | IMAGE_DELIVERY | KIND or REGISTRY |
 | K8S_CLUSTER | kind cluster name in KIND mode |
 | K8S_CONTEXT | Existing kubectl context |
@@ -52,6 +56,8 @@ The Jenkins agent must have a working kubeconfig for the target cluster. Configu
 | REGISTRY_CREDENTIALS_ID | Jenkins username/password credential for registry |
 | TRIVY_BIN | Absolute path to the Trivy executable |
 
+The test stage runs `./venv/bin/python -m pytest -v` directly. The test command
+is intentionally fixed rather than accepted as an arbitrary shell parameter.
 ## Image delivery modes
 
 ### KIND
@@ -71,7 +77,8 @@ The target Deployment must already exist. Provisioning namespaces, Deployments, 
 ## Security notes
 
 - Trivy blocks deployment when unfixed HIGH or CRITICAL image vulnerabilities are found.
-- The test command runs shell code from the checked-out repository. Only run trusted repositories and branches.
+- The test command is fixed in the Jenkinsfile to avoid arbitrary command execution through a build parameter.
+- Run builds only from trusted branches and repositories. Repository code itself still executes during testing.
 - Use least-privilege Jenkins and Kubernetes credentials.
 - Never pass secrets as plain-text build parameters or commit them to Git.
 - Registry credentials must be stored in Jenkins Credentials.
@@ -87,7 +94,7 @@ The target Deployment must already exist. Provisioning namespaces, Deployments, 
 - **Deployment not found:** provision the Deployment first or correct namespace/name parameters.
 - **ImagePullBackOff in REGISTRY mode:** check the image name, registry access, and imagePullSecrets.
 - **Rollout timeout:** inspect the diagnostic Deployment, pod, and event output. The pipeline attempts rollback, but verify the resulting application state manually.
-- **SCM polling does not trigger:** verify the job's configured SCM repository, Jenkins polling logs, and repository/branch settings.
+- **GitHub webhook does not trigger:** verify the webhook delivery status in GitHub, the `/github-webhook/` URL, the Jenkins job's GitHub hook trigger setting, and the configured repository and branch.
 
 ## Verify the deployed application
 
@@ -100,3 +107,13 @@ For an application-specific health check, use its Service and health endpoint, f
 
     kubectl --context kind-cicd-assessment port-forward service/cicd-assessment-service 8081:5000
     curl -i http://localhost:8081/health
+
+## Limitations and Future Improvements
+
+- The verified deployment target is a local kind cluster.
+- GitHub push webhooks trigger Jenkins automatically; the job should not depend on SCM polling.
+- Registry mode requires valid registry credentials and a cluster capable of pulling the image.
+- Private registries may require Kubernetes imagePullSecrets.
+- Jenkins automatic rollback should be validated separately using a controlled failed deployment.
+- Production use requires least-privilege Kubernetes RBAC, protected branches, secure secret management, and a properly secured Jenkins endpoint.
+- Prometheus and Grafana can be integrated for monitoring and alerting.
