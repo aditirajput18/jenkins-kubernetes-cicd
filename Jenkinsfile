@@ -7,9 +7,6 @@ def requireValue(String label, String value) {
 pipeline {
     agent any
 
-    triggers {
-        pollSCM('H/2 * * * *')
-    }
 
     options {
         timestamps()
