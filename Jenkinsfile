@@ -19,44 +19,24 @@ pipeline {
     }
 
     parameters {
-        string(name: 'GIT_URL',
-            defaultValue: 'https://github.com/aditirajput18/jenkins-kubernetes-cicd.git',
-            description: 'Git repository URL')
-        string(name: 'GIT_BRANCH', defaultValue: 'main',
-            description: 'Branch to build')
-        string(name: 'GIT_CREDENTIALS_ID', defaultValue: '',
-            description: 'Optional Jenkins credential ID for a private Git repository')
+        string(name: 'GIT_URL', defaultValue: 'https://github.com/aditirajput18/jenkins-kubernetes-cicd.git', description: 'Git repository URL')
+        string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Branch to build')
+        string(name: 'GIT_CREDENTIALS_ID', defaultValue: '', description: 'Optional Jenkins credential ID for a private Git repository')
 
-        string(name: 'IMAGE_NAME', defaultValue: 'jenkins-kubernetes-cicd',
-            description: 'Image name, without tag or registry hostname')
-        string(name: 'DOCKERFILE_PATH', defaultValue: 'Dockerfile',
-            description: 'Path to Dockerfile relative to repository root')
-        string([
-            $class: 'StringParameterDefinition',
-            name: 'TEST_COMMAND',
-            defaultValue: './venv/bin/python -m pytest -v',
-            description: 'Automated test command'
-        ])
+        string(name: 'IMAGE_NAME', defaultValue: 'jenkins-kubernetes-cicd', description: 'Image name, without tag or registry hostname')
+        string(name: 'DOCKERFILE_PATH', defaultValue: 'Dockerfile', description: 'Path to Dockerfile relative to repository root')
+        string(name: 'TEST_COMMAND', defaultValue: './venv/bin/python -m pytest -v', description: 'Automated test command')
 
-        choice(name: 'IMAGE_DELIVERY', choices: ['KIND', 'REGISTRY'],
-            description: 'KIND loads the image into a local kind cluster; REGISTRY pushes it to a registry')
-        string(name: 'K8S_CLUSTER', defaultValue: 'cicd-assessment',
-            description: 'kind cluster name; used only with KIND delivery')
-        string(name: 'K8S_CONTEXT', defaultValue: 'kind-cicd-assessment',
-            description: 'Existing kubectl context')
-        string(name: 'K8S_NAMESPACE', defaultValue: 'default',
-            description: 'Target namespace')
-        string(name: 'DEPLOYMENT_NAME', defaultValue: 'cicd-assessment-app',
-            description: 'Existing Kubernetes Deployment')
-        string(name: 'CONTAINER_NAME', defaultValue: 'flask-app',
-            description: 'Container name inside the Deployment')
+        choice(name: 'IMAGE_DELIVERY', choices: ['KIND', 'REGISTRY'], description: 'Image delivery method')
+        string(name: 'K8S_CLUSTER', defaultValue: 'cicd-assessment', description: 'kind cluster name; used only with KIND delivery')
+        string(name: 'K8S_CONTEXT', defaultValue: 'kind-cicd-assessment', description: 'Existing kubectl context')
+        string(name: 'K8S_NAMESPACE', defaultValue: 'default', description: 'Target namespace')
+        string(name: 'DEPLOYMENT_NAME', defaultValue: 'cicd-assessment-app', description: 'Existing Kubernetes Deployment')
+        string(name: 'CONTAINER_NAME', defaultValue: 'flask-app', description: 'Container name inside the Deployment')
 
-        string(name: 'REGISTRY_URL', defaultValue: '',
-            description: 'Registry hostname, e.g. registry.example.com; required for REGISTRY')
-        string(name: 'REGISTRY_CREDENTIALS_ID', defaultValue: '',
-            description: 'Jenkins username/password credential ID for registry login')
-        string(name: 'TRIVY_BIN', defaultValue: '/usr/local/bin/trivy',
-            description: 'Absolute path to the Trivy executable')
+        string(name: 'REGISTRY_URL', defaultValue: '', description: 'Registry hostname; required for REGISTRY')
+        string(name: 'REGISTRY_CREDENTIALS_ID', defaultValue: '', description: 'Jenkins username/password credential ID for registry login')
+        string(name: 'TRIVY_BIN', defaultValue: '/usr/local/bin/trivy', description: 'Absolute path to the Trivy executable')
     }
 
     environment {
