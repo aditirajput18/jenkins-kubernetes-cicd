@@ -139,7 +139,7 @@ pipeline {
                     ./venv/bin/python -m pytest -v
                 '''
             }
-
+        }
 
         stage('Build Docker Image') {
             steps {
