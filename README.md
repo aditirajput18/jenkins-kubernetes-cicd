@@ -115,6 +115,36 @@ https://YOUR-TUNNEL-HOST/github-webhook/
 
 Replace `YOUR-TUNNEL-HOST` with the active public tunnel hostname. If using a Cloudflare Quick Tunnel, keep the tunnel running and update the webhook whenever its URL changes.
 
+### GitHub Webhook Integration
+
+#### Initial Approach: SCM Polling
+
+During the initial setup, SCM polling was used to check the GitHub repository periodically for new commits and trigger Jenkins builds.
+
+#### Webhook-Based Triggering
+
+We later configured a GitHub webhook to trigger Jenkins automatically whenever code was pushed to the repository. The integration was verified by pushing code to GitHub and confirming that Jenkins started a new pipeline build.
+
+Since Jenkins was running locally on an Ubuntu VM, **Cloudflare Quick Tunnel** was used to expose the Jenkins webhook endpoint to GitHub.
+
+The webhook URL follows this format:
+
+```text
+https://YOUR-TUNNEL-HOST/github-webhook/
+```
+
+Replace `YOUR-TUNNEL-HOST` with the active Cloudflare Quick Tunnel hostname.
+
+#### Why SCM Polling Was Removed
+
+After webhook triggering was verified, SCM polling was removed. The pipeline now uses event-driven webhook triggering instead of periodically checking GitHub for changes.
+
+#### Limitation
+
+Cloudflare Quick Tunnel provides a temporary public URL. If the tunnel is recreated and its hostname changes, the GitHub webhook URL must be updated accordingly. A named Cloudflare Tunnel with a stable hostname could be considered for a more permanent setup.
+
+**Current configuration:** GitHub push webhook through Cloudflare Quick Tunnel. SCM polling was used during initial setup but is no longer enabled.
+
 ## Local Testing
 
 Create a virtual environment and install dependencies:
