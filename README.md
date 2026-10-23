@@ -205,4 +205,4 @@ Check that the webhook URL points to the currently reachable Jenkins endpoint, t
 
 ## Author
 
-Developed as an SRE Intern assessment project to demonstrate CI/CD automation, automated testing, containerization, vulnerability scanning, Kubernetes deployment, and deployment recovery handling.
+Developed as a Devops Intern assessment project to demonstrate CI/CD automation, automated testing, containerization, vulnerability scanning, Kubernetes deployment, and deployment recovery handling.
